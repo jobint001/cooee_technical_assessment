@@ -3,12 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	
+	"strconv"
 
-	"gorm.io/gorm"
-	"github.com/gorilla/mux"
 	"armstrong-app/models"
 	"armstrong-app/utils"
+
+	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 func VerifyArmstrong(db *gorm.DB) http.HandlerFunc {
@@ -48,47 +49,96 @@ func VerifyArmstrong(db *gorm.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(armstrong)
 	}
 }
-
-func GetUserArmstrongNumbers(db *gorm.DB) http.HandlerFunc {
+func GetUserArmstrongNumbers(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userId := mux.Vars(r)["userId"]
-		var armstrongNumbers []models.ArmstrongNumber
+		userID := mux.Vars(r)["userId"]
 
-		if err := db.Where("user_id = ?", userId).Find(&armstrongNumbers).Error; err != nil {
-			http.Error(w, "Error retrieving Armstrong numbers", http.StatusInternalServerError)
+		// Parse query parameters for pagination
+		pageStr := r.URL.Query().Get("page")
+		sizeStr := r.URL.Query().Get("size")
+		page, err := strconv.Atoi(pageStr)
+		if err != nil || page < 1 {
+			page = 1 // Default to page 1
+		}
+		size, err := strconv.Atoi(sizeStr)
+		if err != nil || size < 1 {
+			size = 10 // Default to 10 items per page
+		}
+
+		// Calculate offset
+		offset := (page - 1) * size
+
+		// Fetch Armstrong numbers for the user
+		var armstrongNumbers []models.ArmstrongNumber
+		result := db.Where("user_id = ?", userID).Offset(offset).Limit(size).Find(&armstrongNumbers)
+		if result.Error != nil {
+			http.Error(w, "Error fetching numbers", http.StatusInternalServerError)
 			return
 		}
 
-		json.NewEncoder(w).Encode(armstrongNumbers)
+		// Count total numbers for pagination metadata
+		var total int64
+		db.Model(&models.ArmstrongNumber{}).Where("user_id = ?", userID).Count(&total)
+
+		// Create response
+		response := map[string]interface{}{
+			"page":       page,
+			"size":       size,
+			"totalPages": (total + int64(size) - 1) / int64(size), // Round up
+			"totalItems": total,
+			"numbers":    armstrongNumbers,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 	}
 }
 
-func GetAllUsersAndNumbers(db *gorm.DB) http.HandlerFunc {
+func GetAllUsersAndNumbers(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse query parameters for pagination
+		pageStr := r.URL.Query().Get("page")
+		sizeStr := r.URL.Query().Get("size")
+		query := r.URL.Query().Get("query") // Optional filter by email
+
+		page, err := strconv.Atoi(pageStr)
+		if err != nil || page < 1 {
+			page = 1
+		}
+		size, err := strconv.Atoi(sizeStr)
+		if err != nil || size < 1 {
+			size = 10
+		}
+
+		// Calculate offset
+		offset := (page - 1) * size
+
+		// Fetch users with Armstrong numbers (using Preload)
 		var users []models.User
-		if err := db.Find(&users).Error; err != nil {
-			http.Error(w, "Error retrieving users", http.StatusInternalServerError)
+		queryBuilder := db.Preload("Numbers")
+		if query != "" {
+			queryBuilder = queryBuilder.Where("email LIKE ?", "%"+query+"%")
+		}
+		result := queryBuilder.Offset(offset).Limit(size).Find(&users)
+		if result.Error != nil {
+			http.Error(w, "Error fetching users", http.StatusInternalServerError)
 			return
 		}
 
-		var result []struct {
-			User          models.User           `json:"user"`
-			ArmstrongNumbers []models.ArmstrongNumber `json:"armstrong_numbers"`
+		// Count total users for pagination metadata
+		var total int64
+		db.Model(&models.User{}).Where("email LIKE ?", "%"+query+"%").Count(&total)
+
+		// Create response
+		response := map[string]interface{}{
+			"page":       page,
+			"size":       size,
+			"totalPages": (total + int64(size) - 1) / int64(size), // Round up
+			"totalItems": total,
+			"data":       users,
 		}
 
-		for _, user := range users {
-			var armstrongNumbers []models.ArmstrongNumber
-			db.Where("user_id = ?", user.ID).Find(&armstrongNumbers)
-
-			result = append(result, struct {
-				User           models.User           `json:"user"`
-				ArmstrongNumbers []models.ArmstrongNumber `json:"armstrong_numbers"`
-			}{
-				User: user,
-				ArmstrongNumbers: armstrongNumbers,
-			})
-		}
-
-		json.NewEncoder(w).Encode(result)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 	}
 }

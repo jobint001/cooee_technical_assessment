@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-	
-    
 	"armstrong-app/database"
-    "armstrong-app/handlers"
+	"armstrong-app/handlers"
+
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -33,6 +33,16 @@ func main() {
 	r.HandleFunc("/armstrong/user/{userId}", handlers.GetUserArmstrongNumbers(db)).Methods("GET")
 	r.HandleFunc("/armstrong/global", handlers.GetAllUsersAndNumbers(db)).Methods("GET")
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"}, // Only allow your frontend's origin
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true, // Allow cookies and Authorization headers
+	})
+
+	// Wrap the router with the CORS middleware
+	handler := c.Handler(r)
+
 	log.Println("Server running on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
