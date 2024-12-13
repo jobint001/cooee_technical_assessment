@@ -30,6 +30,8 @@ func main() {
 
 	// Armstrong Number Routes
 	r.HandleFunc("/armstrong/verify", handlers.VerifyArmstrong(db)).Methods("POST")
+	r.HandleFunc("/armstrong/save", handlers.SaveArmstrongNumber(db)).Methods("POST")
+
 	r.HandleFunc("/armstrong/user/{userId}", handlers.GetUserArmstrongNumbers(db)).Methods("GET")
 	r.HandleFunc("/armstrong/global", handlers.GetAllUsersAndNumbers(db)).Methods("GET")
 

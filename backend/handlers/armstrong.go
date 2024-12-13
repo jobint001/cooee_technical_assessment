@@ -15,11 +15,12 @@ import (
 func VerifyArmstrong(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
-			UserID int `json:"user_id"`
-			Number int `json:"number"`
+			Email  string `json:"email"`
+			Number int    `json:"number"`
 		}
-		err := json.NewDecoder(r.Body).Decode(&input)
-		if err != nil {
+
+		// Decode the input JSON
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 			http.Error(w, "Invalid input", http.StatusBadRequest)
 			return
 		}
@@ -30,18 +31,52 @@ func VerifyArmstrong(db *gorm.DB) http.HandlerFunc {
 		}
 
 		// Check if the number is an Armstrong number
-		if !utils.IsArmstrongNumber(input.Number) {
-			http.Error(w, "Not an Armstrong number", http.StatusBadRequest)
+		isArmstrong := utils.IsArmstrongNumber(input.Number)
+
+		// Check if the user exists
+		var user models.User
+		if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
+			http.Error(w, "User not found", http.StatusBadRequest)
 			return
 		}
 
-		// Save Armstrong number in the database
+		// Response payload
+		response := map[string]interface{}{
+			"number":      input.Number,
+			"isArmstrong": isArmstrong,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
+func SaveArmstrongNumber(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var input struct {
+			Email  string `json:"email"`
+			Number int    `json:"number"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			http.Error(w, "Invalid input", http.StatusBadRequest)
+			return
+		}
+
+		// Fetch the user by email
+		var user models.User
+		if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
+			http.Error(w, "User not found", http.StatusBadRequest)
+			return
+		}
+
+		// Create the Armstrong number entry
 		armstrong := models.ArmstrongNumber{
-			UserID: uint(input.UserID),
+			UserID: user.ID,
 			Number: input.Number,
 		}
 		if err := db.Create(&armstrong).Error; err != nil {
-			http.Error(w, "Error saving Armstrong number", http.StatusInternalServerError)
+			http.Error(w, "Failed to save Armstrong number", http.StatusInternalServerError)
 			return
 		}
 
@@ -49,6 +84,7 @@ func VerifyArmstrong(db *gorm.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(armstrong)
 	}
 }
+
 func GetUserArmstrongNumbers(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := mux.Vars(r)["userId"]
