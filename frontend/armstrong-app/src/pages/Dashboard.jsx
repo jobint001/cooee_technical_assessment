@@ -17,7 +17,7 @@ const UserDashboard = () => {
 
       try {
         console.log("Fetching numbers..."); // Debugging
-        const response = await axios.get("http://localhost:8080/user-dashboard", {
+        const response = await axios.get("http://localhost:8080/user/dashboard", {
           params: { email },
         });
         setNumbers(response.data.numbers); // Replace numbers instead of appending

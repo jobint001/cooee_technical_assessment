@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +23,11 @@ func RegisterUser(db *gorm.DB) http.HandlerFunc {
 
 		// Create user in the database
 		if err := db.Create(&user).Error; err != nil {
+			// Check for duplicate entry error
+			if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+				http.Error(w, "Email already exists", http.StatusConflict)
+				return
+			}
 			http.Error(w, "Error registering user", http.StatusInternalServerError)
 			return
 		}
@@ -32,19 +37,6 @@ func RegisterUser(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func GetUser(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := mux.Vars(r)["id"]
-		var user models.User
-
-		if err := db.First(&user, id).Error; err != nil {
-			http.Error(w, "User not found", http.StatusNotFound)
-			return
-		}
-
-		json.NewEncoder(w).Encode(user)
-	}
-}
 func LoginUser(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var input struct {

@@ -26,15 +26,13 @@ func main() {
 
 	// User Management Routes
 	r.HandleFunc("/users/register", handlers.RegisterUser(db)).Methods("POST")
-	r.HandleFunc("/users/{id}", handlers.GetUser(db)).Methods("GET")
+	r.HandleFunc("/user/dashboard", handlers.GetUserArmstrongNumbers(db)).Methods("GET")
+	r.HandleFunc("/users/login", handlers.LoginUser(db)).Methods("POST")
 
 	// Armstrong Number Routes
 	r.HandleFunc("/armstrong/verify", handlers.VerifyArmstrong(db)).Methods("POST")
 	r.HandleFunc("/armstrong/save", handlers.SaveArmstrongNumber(db)).Methods("POST")
-
-	r.HandleFunc("/user-dashboard", handlers.GetUserArmstrongNumbers(db)).Methods("GET")
 	r.HandleFunc("/armstrong/global", handlers.GetAllUsersAndNumbers(db)).Methods("GET")
-	r.HandleFunc("/users/login", handlers.LoginUser(db)).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173"}, // Only allow your frontend's origin

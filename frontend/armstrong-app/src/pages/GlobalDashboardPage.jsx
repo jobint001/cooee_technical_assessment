@@ -10,7 +10,7 @@ const GlobalDashboard = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await axios.get(
-        `http://localhost:8080/armstrong/global?page=${page}&size=10&query=${query}`
+        `http://localhost:8080/armstrong/global?page=${page}&size=6&query=${query}`
       );
       setUsers(response.data.data);
     };
