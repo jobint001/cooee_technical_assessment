@@ -6,6 +6,7 @@ import (
 
 	"armstrong-app/database"
 	"armstrong-app/handlers"
+	"armstrong-app/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -23,6 +24,7 @@ func main() {
 	defer sqlDB.Close()
 
 	r := mux.NewRouter()
+	r.Use(middleware.LoggerMiddleware)
 
 	// User Management Routes
 	r.HandleFunc("/users/register", handlers.RegisterUser(db)).Methods("POST")
