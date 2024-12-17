@@ -10,11 +10,23 @@ const ArmstrongVerification = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Redirect to register/login if email is missing
   useEffect(() => {
     if (!email) {
-      navigate("/"); // Redirect to sign-in/register if no email is found
+      navigate("/"); 
     }
   }, [email, navigate]);
+
+  // Positive number input validation
+  const handleInputChange = (e) => {
+    const input = e.target.value;
+    if (input === "" || (Number(input) > 0 && !isNaN(input))) {
+      setNumber(input);
+      setError("");
+    } else {
+      setError("Please enter a positive number.");
+    }
+  };
 
   const handleVerify = async () => {
     setError("");
@@ -22,12 +34,7 @@ const ArmstrongVerification = () => {
     setIsArmstrong(false);
 
     if (!number) {
-      setError("Number is required");
-      return;
-    }
-
-    if (number <= 0) {
-      setError("Number must be a positive integer");
+      setError("Number is required.");
       return;
     }
 
@@ -44,7 +51,7 @@ const ArmstrongVerification = () => {
         setMessage(`Number ${number} is not an Armstrong number.`);
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Verification failed");
+      setError(err.response?.data?.error || "Verification failed.");
     }
   };
 
@@ -57,19 +64,20 @@ const ArmstrongVerification = () => {
       setMessage(`Armstrong number ${number} saved successfully.`);
       setIsArmstrong(false);
     } catch (err) {
-      setError(err.response?.data?.error || "Save failed");
+      setError(err.response?.data?.error || "Save failed.");
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA]">
-      
       <div className="flex-grow flex items-center justify-center p-6">
         <div className="bg-white border-t-8 border-[#17408B] p-10 rounded-lg shadow-lg w-full max-w-md">
           <h1 className="text-3xl font-bold text-center text-[#17408B] mb-6">
             Armstrong Number Verification
           </h1>
-          <p className="text-center text-gray-600 mb-6">Logged in as: {email}</p>
+          <p className="text-center text-gray-600 mb-6">
+            Logged in as: <span className="font-medium">{email}</span>
+          </p>
           <div className="space-y-5">
             <div>
               <label
@@ -82,7 +90,7 @@ const ArmstrongVerification = () => {
                 id="number"
                 type="number"
                 value={number}
-                onChange={(e) => setNumber(e.target.value)}
+                onChange={handleInputChange}
                 placeholder="Enter a number"
                 className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#17408B] focus:border-[#17408B] text-gray-700"
               />
