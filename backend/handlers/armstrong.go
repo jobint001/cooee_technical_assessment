@@ -8,7 +8,6 @@ import (
 	"armstrong-app/models"
 	"armstrong-app/utils"
 
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
@@ -85,44 +84,50 @@ func SaveArmstrongNumber(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
+// Backend function for infinite scrolling
 func GetUserArmstrongNumbers(db *gorm.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := mux.Vars(r)["userId"]
+		email := r.URL.Query().Get("email")
+		if email == "" {
+			http.Error(w, "Email is required", http.StatusBadRequest)
+			return
+		}
 
 		// Parse query parameters for pagination
 		pageStr := r.URL.Query().Get("page")
-		sizeStr := r.URL.Query().Get("size")
 		page, err := strconv.Atoi(pageStr)
 		if err != nil || page < 1 {
 			page = 1 // Default to page 1
 		}
-		size, err := strconv.Atoi(sizeStr)
-		if err != nil || size < 1 {
-			size = 10 // Default to 10 items per page
-		}
+		size := 10 // Fixed page size
 
 		// Calculate offset
 		offset := (page - 1) * size
 
+		// Fetch user
+		var user models.User
+		if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+			http.Error(w, "User not found", http.StatusBadRequest)
+			return
+		}
+
 		// Fetch Armstrong numbers for the user
 		var armstrongNumbers []models.ArmstrongNumber
-		result := db.Where("user_id = ?", userID).Offset(offset).Limit(size).Find(&armstrongNumbers)
+		result := db.Where("user_id = ?", user.ID).Offset(offset).Limit(size).Find(&armstrongNumbers)
 		if result.Error != nil {
 			http.Error(w, "Error fetching numbers", http.StatusInternalServerError)
 			return
 		}
 
-		// Count total numbers for pagination metadata
-		var total int64
-		db.Model(&models.ArmstrongNumber{}).Where("user_id = ?", userID).Count(&total)
+		// Check if there are more items
+		hasMore := len(armstrongNumbers) == size
 
 		// Create response
 		response := map[string]interface{}{
-			"page":       page,
-			"size":       size,
-			"totalPages": (total + int64(size) - 1) / int64(size), // Round up
-			"totalItems": total,
-			"numbers":    armstrongNumbers,
+			"page":    page,
+			"size":    size,
+			"hasMore": hasMore,
+			"numbers": armstrongNumbers,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

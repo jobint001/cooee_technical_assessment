@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"armstrong-app/models"
 	"encoding/json"
 	"net/http"
+	"time"
+
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
-	"armstrong-app/models"
-	"time"
 )
 
 func RegisterUser(db *gorm.DB) http.HandlerFunc {
@@ -42,5 +43,29 @@ func GetUser(db *gorm.DB) http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(user)
+	}
+}
+func LoginUser(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var input struct {
+			Email string `json:"email"`
+		}
+
+		// Decode input JSON
+		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+			http.Error(w, "Invalid input", http.StatusBadRequest)
+			return
+		}
+
+		// Check if the email exists in the database
+		var user models.User
+		if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
+			http.Error(w, "User not found", http.StatusUnauthorized)
+			return
+		}
+
+		// Respond with success
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 	}
 }
