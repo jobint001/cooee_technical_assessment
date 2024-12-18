@@ -29,7 +29,8 @@ cooee_technical_assessment/
 │   └── package.json  # React project dependencies
 │
 └── README.md         # Project documentation
-
+│
+└── ArmstrongAppCollection.postman_collection.json  #Postman collection for backend APIs
 
 ```
 
