@@ -47,7 +47,7 @@ cooee_technical_assessment/
     CREATE DATABASE armstrong_app;
 ### **Step 2: Setup Environment Variables**
 
-Create a `.env` file in the **backend** directory and add the following content:
+Create a `.env` file in the **backend** directory and add the following content(use actual DB username and password):
 
 ```env
 DB_USER=root
