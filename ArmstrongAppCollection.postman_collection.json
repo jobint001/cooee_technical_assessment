@@ -1,0 +1,289 @@
+{
+	"info": {
+		"_postman_id": "2f465988-050c-4203-a59a-d11a1af9dc00",
+		"name": "ArmstrongAppCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17978714"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8080/users/register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"email\": \"user3@example.com\" }"
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/users/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"email\": \"user@example.com\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/user/dashboard?email=user@example.com",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/user/dashboard?email=user@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"dashboard"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "user@example.com"
+						}
+					]
+				},
+				"description": "Fetches Armstrong numbers for a user"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/armstrong/verify",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"email\": \"user@example.com\", \"number\": 153 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/armstrong/verify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"armstrong",
+						"verify"
+					]
+				},
+				"description": "Verifies if a number is an Armstrong number"
+			},
+			"response": [
+				{
+					"name": "http://localhost:8080/armstrong/verify",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"email\": \"user@example.com\", \"number\": 153 }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/armstrong/verify",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"armstrong",
+								"verify"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 17 Dec 2024 14:57:08 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "34"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"isArmstrong\": true,\n    \"number\": 153\n}"
+				}
+			]
+		},
+		{
+			"name": "http://localhost:8080/armstrong/save",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"email\": \"user2@example.com\", \"number\": 153 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/armstrong/save",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"armstrong",
+						"save"
+					]
+				},
+				"description": "Saves an Armstrong number for the user"
+			},
+			"response": [
+				{
+					"name": "http://localhost:8080/armstrong/save",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"email\": \"user2@example.com\", \"number\": 153 }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/armstrong/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"armstrong",
+								"save"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 17 Dec 2024 14:59:46 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "80"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/plain; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\"id\":22,\"user_id\":8,\"number\":153,\"created_at\":\"2024-12-17T20:29:46.565+05:30\"}\n"
+				}
+			]
+		},
+		{
+			"name": "http://localhost:8080/armstrong/global",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/armstrong/global",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"armstrong",
+						"global"
+					]
+				},
+				"description": "Fetches all users and Armstrong numbers"
+			},
+			"response": []
+		}
+	]
+}
